@@ -1,6 +1,6 @@
 # Weather Widget using React
 
-## Available Scripts
+Author: Samyadh Jain
 
 In the project directory, you can run:
 
