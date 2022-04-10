@@ -2,8 +2,8 @@ import { useState, createContext, useEffect } from "react";
 import frenchCities from "./../../assets/data/cities-fr.json";
 
 const { baseUrl, apiKey } = {
-  baseUrl: "https://api.openweathermap.org/data/2.5/",
-  apiKey: "591af8c3c9dd19762d7fbdf40d808ac1",
+  baseUrl: process.env.REACT_APP_OPEN_WEATHER_BASE_URL,
+  apiKey: process.env.REACT_APP_OPEN_WEATHER_API_KEY,
 };
 
 export const WeatherInfoContext = createContext({});
@@ -28,29 +28,24 @@ const WeatherInfoProvider = ({ children }) => {
   useEffect(() => {
     const getWeatherForecast = async (cityDetails) => {
       setLoading(true);
-      const weatherResponse = await fetch(
-        `${baseUrl}/weather?lat=${cityDetails.lat}&lon=${cityDetails.lon}&units=metric&appid=${apiKey}`
-      ).then((res) => res.json());
       const forecastResponse = await fetch(
-        `${baseUrl}/forecast/daily?lat=${cityDetails.lat}&lon=${cityDetails.lon}&cnt=4&units=metric&appid=${apiKey}`
+        `${baseUrl}onecall?lat=${cityDetails.lat}&lon=${cityDetails.lon}&exclude=minutely,hourly,alerts&units=metric&appid=${apiKey}`
       ).then((res) => res.json());
 
       const weatherInfo = [];
-      if (weatherResponse) {
+
+      if (forecastResponse && forecastResponse.daily.length) {
         weatherInfo.push(
           getWeatherItem(
-            weatherResponse.main.temp,
-            weatherResponse.main.temp_max,
-            weatherResponse.main.temp_min,
-            weatherResponse.weather[0].id,
-            weatherResponse.dt
+            forecastResponse.current.temp,
+            forecastResponse.current.temp.max,
+            forecastResponse.current.temp.min,
+            `wi wi-icon-${forecastResponse.current.weather[0].id}`,
+            forecastResponse.current.dt
           )
         );
-      }
-
-      if (forecastResponse && forecastResponse.list) {
-        forecastResponse.list.forEach((forecast, index) => {
-          if (index > 0) {
+        forecastResponse.daily.forEach((forecast, index) => {
+          if (index < 3) {
             weatherInfo.push(
               getWeatherItem(
                 forecast.temp.day,
